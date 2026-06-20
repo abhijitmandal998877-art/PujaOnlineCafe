@@ -471,14 +471,17 @@ private suspend fun submitWeb3Form(name: String, email: String, message: String)
 
             val request = Request.Builder()
                 .url("https://api.web3forms.com/submit")
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36")
+                .header("Accept", "application/json")
                 .post(requestBody)
                 .build()
 
             val response = client.newCall(request).execute()
+            val responseBody = response.body?.string() ?: ""
             if (response.isSuccessful) {
                 Pair(true, "Sent")
             } else {
-                Pair(false, "Server error (${response.code}). Failed to submit form.")
+                Pair(false, "Web3Forms Error (${response.code}): $responseBody")
             }
         } catch (e: Exception) {
             Pair(false, e.localizedMessage ?: "Network error. Check connection.")
