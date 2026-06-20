@@ -41,6 +41,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Start background Firestore listening service for instant notifications even when closed
+        try {
+            val serviceIntent = android.content.Intent(this, com.example.service.NotificationService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed starting notification service", e)
+        }
+
         enableEdgeToEdge()
         setContent {
             val viewModel: MainViewModel = viewModel()
