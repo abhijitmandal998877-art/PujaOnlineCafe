@@ -1,0 +1,34 @@
+{
+  "project_info": {
+    "project_number": "222183636971",
+    "project_id": "puja-online-cafe",
+    "storage_bucket": "puja-online-cafe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:222183636971:android:f815b717445d81758f63ae",
+        "android_client_info": {
+          "package_name": "com.example.pujaonlinecafe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "222183636971-oauthclientplaceholder.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_FTrbrGuZ8B5X7jfMNIGVwyBpO6B6QU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

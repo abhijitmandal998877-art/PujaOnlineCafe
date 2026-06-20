@@ -1,0 +1,6 @@
+{
+  "name": "Puja Online Cafe",
+  "description": "Full-stack client app and admin dashboard for Puja Online Cafe shop posts, customer banning, and contact links",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
