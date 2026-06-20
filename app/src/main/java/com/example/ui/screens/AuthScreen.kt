@@ -45,6 +45,7 @@ fun AuthScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var showResetSuccessDialog by remember { mutableStateOf(false) }
 
     // Google Sign-In dialog mock selector
     var showGoogleSelector by remember { mutableStateOf(false) }
@@ -291,12 +292,73 @@ fun AuthScreen(
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 8.dp)
                     .testTag("input_password"),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 shape = RoundedCornerShape(12.dp)
             )
+
+            // Forgot Password Hyperlink
+            if (isLogin) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "Forgot Password?",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .clickable {
+                                if (email.trim().isEmpty()) {
+                                    errorMessage = "Please enter your email above before requesting reset link."
+                                } else if (!email.trim().contains("@")) {
+                                    errorMessage = "Please enter a valid email address."
+                                } else {
+                                    loading = true
+                                    errorMessage = null
+                                    successMessage = null
+                                    viewModel.sendPasswordResetEmail(
+                                        email = email.trim(),
+                                        onSuccess = {
+                                            loading = false
+                                            showResetSuccessDialog = true
+                                        },
+                                        onFailure = { err ->
+                                            loading = false
+                                            errorMessage = err
+                                        }
+                                    )
+                                }
+                            }
+                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                    )
+                }
+
+                if (showResetSuccessDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showResetSuccessDialog = false },
+                        title = { Text("Reset Email Sent! 📢") },
+                        text = {
+                            Text("A password reset link has been successfully issued to:\n\n${email.trim()}\n\n⚠️ IMPORTANT: Please check your SPAM / JUNK / UPDATES folder in Gmail or your mail app, as automatic Firebase password reset links often get filtered to spam folders!")
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = { showResetSuccessDialog = false }
+                            ) {
+                                Text("I'll Check Spam Folder", fontWeight = FontWeight.Bold)
+                            }
+                        },
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             // Submit Button
             if (loading) {

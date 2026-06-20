@@ -46,10 +46,10 @@ class NotificationService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                "Puja Cafe Notification Engine",
-                NotificationManager.IMPORTANCE_LOW
+                "Cafe Syncer Service",
+                NotificationManager.IMPORTANCE_MIN
             ).apply {
-                description = "Keeps connection with cafe server for instant updates"
+                description = "Optimizes live content updates and sync."
             }
             manager.createNotificationChannel(channel)
         }
@@ -63,15 +63,14 @@ class NotificationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Try using standard system icon
         val smallIcon = android.R.drawable.ic_dialog_info
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Puja Online Cafe")
-            .setContentText("Listening for live cafe updates...")
+            .setContentTitle("Puja Cafe Sync")
+            .setContentText("Keeping content up-to-date")
             .setSmallIcon(smallIcon)
             .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
             .setOngoing(true)
             .build()
 

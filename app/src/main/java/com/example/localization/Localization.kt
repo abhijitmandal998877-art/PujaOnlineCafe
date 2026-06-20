@@ -282,6 +282,11 @@ object Localization {
             "en" to "Share link copied!",
             "bn" to "শেয়ার লিংক কপি করা হয়েছে!",
             "hi" to "शेयर लिंक कॉपी किया गया!"
+        ),
+        "developer" to mapOf(
+            "en" to "Developer",
+            "bn" to "ডেভেলপার",
+            "hi" to "डेवलपर"
         )
     )
 

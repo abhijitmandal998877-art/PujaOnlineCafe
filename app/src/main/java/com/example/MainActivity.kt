@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContactPhone
+import androidx.compose.material.icons.filled.ContactSupport
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -24,22 +25,38 @@ import com.example.ui.screens.*
 import com.example.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val isPermissionGrantedState = mutableStateOf(true)
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        isPermissionGrantedState.value = isGranted
+        if (!isGranted) {
+            android.widget.Toast.makeText(this, "Notification permission is required to use this app. Closing...", android.widget.Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
+
+    private fun checkPermissionStatus() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            isPermissionGrantedState.value = granted
+            if (!granted) {
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            isPermissionGrantedState.value = true
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Request notification permission at runtime for Android 13+ (Tiramisu)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            val requestPermissionLauncher = registerForActivityResult(
-                androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-            ) { _ -> }
-            if (androidx.core.content.ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
+        checkPermissionStatus()
 
         // Start background Firestore listening service for instant notifications even when closed
         try {
@@ -63,15 +80,24 @@ class MainActivity : ComponentActivity() {
             val currentLanguage = viewModel.currentLanguage
 
             MyApplicationTheme(darkTheme = isDarkTheme) {
-                // Intro Loading Screen state
-                var showIntroLoading by remember { mutableStateOf(true) }
+                val permissionGranted by remember { isPermissionGrantedState }
 
-                if (showIntroLoading) {
-                    LoadingScreen(
+                if (!permissionGranted) {
+                    PermissionBlockScreen(
                         language = currentLanguage,
-                        onFinished = { showIntroLoading = false }
+                        onGrantRequest = { checkPermissionStatus() },
+                        onExitRequest = { finish() }
                     )
                 } else {
+                    // Intro Loading Screen state
+                    var showIntroLoading by remember { mutableStateOf(true) }
+
+                    if (showIntroLoading) {
+                        LoadingScreen(
+                            language = currentLanguage,
+                            onFinished = { showIntroLoading = false }
+                        )
+                    } else {
                     val authStateLoading by viewModel.authStateLoading.collectAsState()
                     
                     if (authStateLoading) {
@@ -156,6 +182,15 @@ class MainActivity : ComponentActivity() {
                                                 NavigationBarItem(
                                                     selected = activeTab == 2,
                                                     onClick = { activeTab = 2 },
+                                                    icon = { Icon(Icons.Default.ContactSupport, contentDescription = "Developer") },
+                                                    label = { Text(Localization.getString("developer", currentLanguage)) },
+                                                    modifier = Modifier.testTag("tab_developer")
+                                                )
+
+                                                // Settings tab
+                                                NavigationBarItem(
+                                                    selected = activeTab == 3,
+                                                    onClick = { activeTab = 3 },
                                                     icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
                                                     label = { Text(Localization.getString("settings", currentLanguage)) },
                                                     modifier = Modifier.testTag("tab_settings")
@@ -188,7 +223,10 @@ class MainActivity : ComponentActivity() {
                                                     shopDetails = shopDetails,
                                                     language = currentLanguage
                                                 )
-                                                2 -> SettingsScreen(
+                                                2 -> DeveloperScreen(
+                                                    language = currentLanguage
+                                                )
+                                                3 -> SettingsScreen(
                                                     userProfile = profile,
                                                     currentLanguage = currentLanguage,
                                                     onLanguageChange = { newLang ->
@@ -210,6 +248,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+                }
                 }
             }
         }

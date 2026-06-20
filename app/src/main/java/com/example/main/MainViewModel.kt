@@ -337,6 +337,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun sendPasswordResetEmail(
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (email.isEmpty()) {
+            onFailure("Please enter your email address in the input field above first.")
+            return
+        }
+        if (!email.contains("@")) {
+            onFailure("Please enter a valid email address to request a reset link.")
+            return
+        }
+        auth.sendPasswordResetEmail(email.trim())
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e.localizedMessage ?: "Failed sending reset email") }
+    }
+
     fun loginWithGooglePasswordless(
         googleEmail: String,
         googleName: String,
